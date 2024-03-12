@@ -1,6 +1,6 @@
-# ¼ì²éÊÇ·ñÒÔ¹ÜÀíÔ±È¨ÏŞÔËĞĞ
+# æ£€æŸ¥æ˜¯å¦ä»¥ç®¡ç†å‘˜æƒé™è¿è¡Œ
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Host "ÇëÒÔ¹ÜÀíÔ±È¨ÏŞÔËĞĞ´Ë½Å±¾¡£"
+    Write-Host "è¯·ä»¥ç®¡ç†å‘˜æƒé™è¿è¡Œæ­¤è„šæœ¬ã€‚"
 #    Start-Sleep -Seconds 5
     Start-Process powershell.exe -Verb RunAs -ArgumentList ("-File", $MyInvocation.MyCommand.Path)
     exit
@@ -11,10 +11,10 @@ function Convert-PrefixLengthToSubnetMask {
         [int]$PrefixLength
     )
 
-    # ³õÊ¼»¯×ÓÍøÑÚÂëÊı×é
+    # åˆå§‹åŒ–å­ç½‘æ©ç æ•°ç»„
     $subnetMask = @(0, 0, 0, 0)
 
-    # ¸ù¾İÇ°×º³¤¶ÈÉèÖÃ×ÓÍøÑÚÂëµÄÖµ
+    # æ ¹æ®å‰ç¼€é•¿åº¦è®¾ç½®å­ç½‘æ©ç çš„å€¼
     for ($i = 0; $i -lt 4; $i++) {
         if ($PrefixLength -ge 8) {
             $subnetMask[$i] = 255
@@ -26,7 +26,7 @@ function Convert-PrefixLengthToSubnetMask {
         }
     }
 
-    # ½«×ÓÍøÑÚÂëÊı×é×ª»»Îª×ÓÍøÑÚÂë×Ö·û´®
+    # å°†å­ç½‘æ©ç æ•°ç»„è½¬æ¢ä¸ºå­ç½‘æ©ç å­—ç¬¦ä¸²
     $subnetMaskString = $subnetMask -join '.'
     return $subnetMaskString
 }
@@ -38,7 +38,7 @@ function Convert-SubnetMaskToPrefixLength {
         [string]$SubnetMask
     )
 
-    # ½«×ÓÍøÑÚÂë×ª»»ÎªÇ°×º³¤¶È
+    # å°†å­ç½‘æ©ç è½¬æ¢ä¸ºå‰ç¼€é•¿åº¦
     $subnetParts = $SubnetMask.Split('.')
     $prefixLength = 0
     foreach ($part in $subnetParts) {
@@ -63,7 +63,7 @@ function Convert-IPAddressToInteger {
     return $ipInteger
 }
 
-function Validate-IPAddress {
+function Confirm-IPAddress {
     param (
         [string]$IPAddress,
         [string]$SubnetMask
@@ -72,15 +72,15 @@ function Validate-IPAddress {
     $ipInteger = Convert-IPAddressToInteger -IPAddress $IPAddress
     $subnetInteger = Convert-IPAddressToInteger -IPAddress $SubnetMask
 
-    # ¼ÆËãÍøÂçµØÖ·ºÍ¹ã²¥µØÖ·
+    # è®¡ç®—ç½‘ç»œåœ°å€å’Œå¹¿æ’­åœ°å€
     $networkAddress = $ipInteger -band $subnetInteger
     $broadcastAddress = $networkAddress -bor -bnot $subnetInteger
 
-    # ¼ÆËãÖ÷»úµØÖ··¶Î§
+    # è®¡ç®—ä¸»æœºåœ°å€èŒƒå›´
     $hostAddressMin = $networkAddress + 1
     $hostAddressMax = $broadcastAddress - 1
 
-    # ÅĞ¶ÏIPµØÖ·ÊÇ·ñÔÚÖ÷»úµØÖ··¶Î§ÄÚ
+    # åˆ¤æ–­IPåœ°å€æ˜¯å¦åœ¨ä¸»æœºåœ°å€èŒƒå›´å†…
     if ($ipInteger -ge $hostAddressMin -and $ipInteger -le $hostAddressMax) {
         return $true
     }
@@ -88,154 +88,154 @@ function Validate-IPAddress {
 }
 
 do {
-    # ÁĞ³öËùÓĞÍø¿¨
+    # åˆ—å‡ºæ‰€æœ‰ç½‘å¡
     $networkAdapters = Get-NetAdapter | Select-Object -Property Name, InterfaceDescription, InterfaceIndex, Status
 
-    # ÏÔÊ¾Íø¿¨ÁĞ±í¹©Ñ¡Ôñ
-    Write-Host "ÇëÑ¡ÔñÒªĞŞ¸ÄµÄÍø¿¨£º"
+    # æ˜¾ç¤ºç½‘å¡åˆ—è¡¨ä¾›é€‰æ‹©
+    Write-Host "è¯·é€‰æ‹©è¦ä¿®æ”¹çš„ç½‘å¡ï¼š"
     for ($i = 0; $i -lt $networkAdapters.Count; $i++) {
         Write-Host "$($i + 1): $($networkAdapters[$i].Name) - $($networkAdapters[$i].InterfaceDescription)"
     }
-    Write-Host "q: ÍË³ö½Å±¾"
+    Write-Host "q: é€€å‡ºè„šæœ¬"
 
-    # Ñ¡ÔñÍø¿¨
-    $selectedIndex = Read-Host "ÇëÊäÈëÒªĞŞ¸ÄµÄÍø¿¨µÄĞòºÅ"
+    # é€‰æ‹©ç½‘å¡
+    $selectedIndex = Read-Host "è¯·è¾“å…¥è¦ä¿®æ”¹çš„ç½‘å¡çš„åºå·"
     
-    #ÊäÈëqÍË³ö½Å±¾
+    #è¾“å…¥qé€€å‡ºè„šæœ¬
     if ($selectedIndex -eq "q") {
         exit
     }
     else {
-        #ÊäÈëÆäËûÎŞĞ§ÖµÖØ¸´Ñ­»·
+        #è¾“å…¥å…¶ä»–æ— æ•ˆå€¼é‡å¤å¾ªç¯
         if ($selectedIndex -lt 1 -or $selectedIndex -gt $networkAdapters.Count ) {
-        Write-Host "ÎŞĞ§µÄÑ¡Ôñ¡£"
+        Write-Host "æ— æ•ˆçš„é€‰æ‹©ã€‚"
         continue
         }
     }
     
-    # »ñÈ¡Ñ¡ÔñµÄÍø¿¨¶ÔÏó
+    # è·å–é€‰æ‹©çš„ç½‘å¡å¯¹è±¡
     $selectedAdapter = $networkAdapters[$selectedIndex - 1]
 
-    # ¼ì²éÍø¿¨ÊÇ·ñÒÑÆôÓÃ
+    # æ£€æŸ¥ç½‘å¡æ˜¯å¦å·²å¯ç”¨
     if ($selectedAdapter.Status -ne 'Up') {
-        Write-Host "Ñ¡ÔñµÄÍø¿¨Î´ÆôÓÃ¡£"
+        Write-Host "é€‰æ‹©çš„ç½‘å¡æœªå¯ç”¨ã€‚"
         continue
     }
 
-    # »ñÈ¡Ñ¡ÔñµÄÍø¿¨µÄ InterfaceIndex
+    # è·å–é€‰æ‹©çš„ç½‘å¡çš„ InterfaceIndex
     $interfaceIndex = $selectedAdapter.InterfaceIndex
 
-    # ÏÔÊ¾²Ëµ¥¹©Ñ¡Ôñ
-    Write-Host "Ñ¡Ôñ²Ù×÷£º"
-    Write-Host "1. ĞŞ¸ÄÍø¿¨"
-    Write-Host "2. »Ö¸´Íø¿¨"
-    Write-Host "3. Ìí¼Ó¾²Ì¬Â·ÓÉ"
-    Write-Host "q. ÍË³ö½Å±¾"
+    # æ˜¾ç¤ºèœå•ä¾›é€‰æ‹©
+    Write-Host "é€‰æ‹©æ“ä½œï¼š"
+    Write-Host "1. ä¿®æ”¹ç½‘å¡"
+    Write-Host "2. æ¢å¤ç½‘å¡"
+    Write-Host "3. æ·»åŠ é™æ€è·¯ç”±"
+    Write-Host "q. é€€å‡ºè„šæœ¬"
 
-    # Ñ¡Ôñ²Ù×÷
-    $action = Read-Host "ÇëÊäÈëÒªÖ´ĞĞµÄ²Ù×÷"
+    # é€‰æ‹©æ“ä½œ
+    $action = Read-Host "è¯·è¾“å…¥è¦æ‰§è¡Œçš„æ“ä½œ"
 
-    # Ö´ĞĞÑ¡ÔñµÄ²Ù×÷
+    # æ‰§è¡Œé€‰æ‹©çš„æ“ä½œ
     switch ($action) {
         1 {
-            # Ö´ĞĞĞŞ¸ÄÍø¿¨²Ù×÷
-            # Çå³ıÍø¿¨µÄËùÓĞÅäÖÃ
+            # æ‰§è¡Œä¿®æ”¹ç½‘å¡æ“ä½œ
+            # æ¸…é™¤ç½‘å¡çš„æ‰€æœ‰é…ç½®
             Get-NetIPAddress -InterfaceIndex $interfaceIndex | Remove-NetIPAddress -Confirm:$false -ErrorAction SilentlyContinue
             Get-NetRoute -InterfaceIndex $interfaceIndex | Remove-NetRoute -Confirm:$false -ErrorAction SilentlyContinue
             Set-DnsClientServerAddress -InterfaceIndex $interfaceIndex -ResetServerAddresses -ErrorAction SilentlyContinue
 
-            # »ñÈ¡ÒªÉèÖÃµÄĞÂ IP µØÖ·ºÍ×ÓÍøÇ°×º³¤¶È»ò×ÓÍøÑÚÂë
-            $newIPAddress = Read-Host "ÇëÊäÈëĞÂµÄ IP µØÖ·"
-            $newSubnetOrPrefix = Read-Host "ÇëÊäÈë×ÓÍøÇ°×º³¤¶È»ò×ÓÍøÑÚÂë"
+            # è·å–è¦è®¾ç½®çš„æ–° IP åœ°å€å’Œå­ç½‘å‰ç¼€é•¿åº¦æˆ–å­ç½‘æ©ç 
+            $newIPAddress = Read-Host "è¯·è¾“å…¥æ–°çš„ IP åœ°å€"
+            $newSubnetOrPrefix = Read-Host "è¯·è¾“å…¥å­ç½‘å‰ç¼€é•¿åº¦æˆ–å­ç½‘æ©ç "
 
-            # ÅĞ¶ÏÊäÈëµÄÊÇÇ°×º³¤¶È»¹ÊÇ×ÓÍøÑÚÂë
+            # åˆ¤æ–­è¾“å…¥çš„æ˜¯å‰ç¼€é•¿åº¦è¿˜æ˜¯å­ç½‘æ©ç 
             if ($newSubnetOrPrefix -match '^\d+$') {
-                # ÊäÈëÎªÇ°×º³¤¶È
+                # è¾“å…¥ä¸ºå‰ç¼€é•¿åº¦
                 $newPrefixLength = [int]$newSubnetOrPrefix
                 $newSubnetMask = Convert-PrefixLengthToSubnetMask -PrefixLength $newPrefixLength
             }
             else {
-                # ÊäÈëÎª×ÓÍøÑÚÂë
+                # è¾“å…¥ä¸ºå­ç½‘æ©ç 
                 $newSubnetMask = $newSubnetOrPrefix
                 $newPrefixLength = Convert-SubnetMaskToPrefixLength -SubnetMask $newSubnetMask
             }
 
-            # ÑéÖ¤ IP µØÖ·ºÍ×ÓÍøÑÚÂëÊÇ·ñÆ¥Åä
-            while (-not (Validate-IPAddress -IPAddress $newIPAddress -SubnetMask $newSubnetMask)) {
-                Write-Host "IP µØÖ·²»ÔÚ×ÓÍø·¶Î§ÄÚ£¬ÇëÖØĞÂÊäÈë¡£"
-                $newIPAddress = Read-Host "ÇëÊäÈëĞÂµÄ IP µØÖ·"
-                $newSubnetOrPrefix = Read-Host "ÇëÊäÈë×ÓÍøÇ°×º³¤¶È»ò×ÓÍøÑÚÂë"
+            # éªŒè¯ IP åœ°å€å’Œå­ç½‘æ©ç æ˜¯å¦åŒ¹é…
+            while (-not (Confirm-IPAddress -IPAddress $newIPAddress -SubnetMask $newSubnetMask)) {
+                Write-Host "IP åœ°å€ä¸åœ¨å­ç½‘èŒƒå›´å†…ï¼Œè¯·é‡æ–°è¾“å…¥ã€‚"
+                $newIPAddress = Read-Host "è¯·è¾“å…¥æ–°çš„ IP åœ°å€"
+                $newSubnetOrPrefix = Read-Host "è¯·è¾“å…¥å­ç½‘å‰ç¼€é•¿åº¦æˆ–å­ç½‘æ©ç "
 
-                # ÅĞ¶ÏÊäÈëµÄÊÇÇ°×º³¤¶È»¹ÊÇ×ÓÍøÑÚÂë
+                # åˆ¤æ–­è¾“å…¥çš„æ˜¯å‰ç¼€é•¿åº¦è¿˜æ˜¯å­ç½‘æ©ç 
                 if ($newSubnetOrPrefix -match '^\d+$') {
-                    # ÊäÈëÎªÇ°×º³¤¶È
+                    # è¾“å…¥ä¸ºå‰ç¼€é•¿åº¦
                     $newPrefixLength = [int]$newSubnetOrPrefix
                     $newSubnetMask = Convert-PrefixLengthToSubnetMask -PrefixLength $newPrefixLength
                 }
                 else {
-                    # ÊäÈëÎª×ÓÍøÑÚÂë
+                    # è¾“å…¥ä¸ºå­ç½‘æ©ç 
                     $newSubnetMask = $newSubnetOrPrefix
                     $newPrefixLength = Convert-SubnetMaskToPrefixLength -SubnetMask $newSubnetMask
                 }
             }
 
-            # »ñÈ¡ÒªÉèÖÃµÄĞÂÍø¹Ø
-            $newGateway = Read-Host "ÇëÊäÈëĞÂµÄÍø¹Ø (¿ÉÑ¡)"
+            # è·å–è¦è®¾ç½®çš„æ–°ç½‘å…³
+            $newGateway = Read-Host "è¯·è¾“å…¥æ–°çš„ç½‘å…³ (å¯é€‰)"
 
-            # Ê¹ÓÃĞÂ IP µØÖ·ºÍ×ÓÍøÑÚÂëÅäÖÃÍø¿¨
+            # ä½¿ç”¨æ–° IP åœ°å€å’Œå­ç½‘æ©ç é…ç½®ç½‘å¡
             New-NetIPAddress -InterfaceIndex $interfaceIndex -IPAddress $newIPAddress -PrefixLength $newPrefixLength | Out-Null
 
-            # Èç¹ûÓĞÊäÈëÍø¹Ø£¬Ôò½øĞĞ¼ì²é²¢ÉèÖÃÍø¹Ø
+            # å¦‚æœæœ‰è¾“å…¥ç½‘å…³ï¼Œåˆ™è¿›è¡Œæ£€æŸ¥å¹¶è®¾ç½®ç½‘å…³
             while ($true) {
                 if ($newGateway -eq "") {
                     break
                 }
 
-                # »ñÈ¡IPµØÖ·¡¢×ÓÍøÑÚÂë¡¢Íø¹ØµÄÕûÊı±íÊ¾ĞÎÊ½
+                # è·å–IPåœ°å€ã€å­ç½‘æ©ç ã€ç½‘å…³çš„æ•´æ•°è¡¨ç¤ºå½¢å¼
                 $ipInteger = Convert-IPAddressToInteger -IPAddress $newIPAddress
                 $subnetInteger = Convert-IPAddressToInteger -IPAddress $newSubnetMask
                 $gatewayInteger = Convert-IPAddressToInteger -IPAddress $newGateway
 
-                # »ñÈ¡ÍøÂçµØÖ·µÄÕûÊı±íÊ¾ĞÎÊ½
+                # è·å–ç½‘ç»œåœ°å€çš„æ•´æ•°è¡¨ç¤ºå½¢å¼
                 $networkAddressInteger = $ipInteger -band $subnetInteger
 
-                # ¼ÆËãÍø¹ØµÄÍøÂçµØÖ·
+                # è®¡ç®—ç½‘å…³çš„ç½‘ç»œåœ°å€
                 $gatewayNetworkAddressInteger = $gatewayInteger -band $subnetInteger
 
-                # ¼ì²éÍø¹ØÊÇ·ñÓë IP µØÖ·ÔÚÍ¬Ò»×ÓÍøÖĞ£¬²¢ÇÒÈ·±£Íø¹Ø²»ÊÇÊäÈëµÄIPµØÖ·
+                # æ£€æŸ¥ç½‘å…³æ˜¯å¦ä¸ IP åœ°å€åœ¨åŒä¸€å­ç½‘ä¸­ï¼Œå¹¶ä¸”ç¡®ä¿ç½‘å…³ä¸æ˜¯è¾“å…¥çš„IPåœ°å€
                 if ($networkAddressInteger -ne $gatewayNetworkAddressInteger -or $gatewayInteger -eq $ipInteger) {
-                    Write-Host "ÊäÈëµÄÍø¹ØÓë IP µØÖ·²»ÔÚÍ¬Ò»×ÓÍøÖĞ»òÕßÓë IP µØÖ·ÏàÍ¬£¬ÇëÖØĞÂÊäÈë¡£"
-                    $newGateway = Read-Host "ÇëÊäÈëĞÂµÄÍø¹Ø"
+                    Write-Host "è¾“å…¥çš„ç½‘å…³ä¸ IP åœ°å€ä¸åœ¨åŒä¸€å­ç½‘ä¸­æˆ–è€…ä¸ IP åœ°å€ç›¸åŒï¼Œè¯·é‡æ–°è¾“å…¥ã€‚"
+                    $newGateway = Read-Host "è¯·è¾“å…¥æ–°çš„ç½‘å…³"
                 } else {
-                    Write-Host "1. ÉèÖÃÄ¬ÈÏÂ·ÓÉ"
-                    Write-Host "2. ÉèÖÃ¾²Ì¬Â·ÓÉ"
-                    # Ñ¡Ôñ²Ù×÷
-                    $action = Read-Host "ÇëÊäÈëÒªÖ´ĞĞµÄ²Ù×÷"
+                    Write-Host "1. è®¾ç½®é»˜è®¤è·¯ç”±"
+                    Write-Host "2. è®¾ç½®é™æ€è·¯ç”±"
+                    # é€‰æ‹©æ“ä½œ
+                    $action = Read-Host "è¯·è¾“å…¥è¦æ‰§è¡Œçš„æ“ä½œ"
 
-                    # Ö´ĞĞÑ¡ÔñµÄ²Ù×÷
+                    # æ‰§è¡Œé€‰æ‹©çš„æ“ä½œ
                     switch ($action) {
                         1 {
-                            # ÉèÖÃÍø¹Ø
+                            # è®¾ç½®ç½‘å…³
                             New-NetRoute -InterfaceIndex $interfaceIndex -DestinationPrefix "0.0.0.0/0" -NextHop $newGateway
                             
                             break
                         }
                         2 {
-                            # ÉèÖÃ¾²Ì¬Â·ÓÉ
+                            # è®¾ç½®é™æ€è·¯ç”±
                             $staticRouteSelected = "Y"
                             while ($staticRouteSelected -eq "Y") {
-                                $destinationNetwork = Read-Host "ÇëÊäÈëÄ¿±êÍøÂçµØÖ·ºÍÇ°×º³¤¶È (ÀıÈç£º192.168.1.0/24)"
+                                $destinationNetwork = Read-Host "è¯·è¾“å…¥ç›®æ ‡ç½‘ç»œåœ°å€å’Œå‰ç¼€é•¿åº¦ (ä¾‹å¦‚ï¼š192.168.1.0/24)"
 
-                                # Ìí¼Ó¾²Ì¬Â·ÓÉ
+                                # æ·»åŠ é™æ€è·¯ç”±
                                 New-NetRoute -DestinationPrefix $destinationNetwork -InterfaceIndex $interfaceIndex -NextHop $newGateway
 
-                                Write-Host "¾²Ì¬Â·ÓÉÒÑÅäÖÃ¡£"
-                                $staticRouteSelected = Read-Host "ÊÇ·ñ¼ÌĞøÌí¼Ó(Y/N,default=N)?"
+                                Write-Host "é™æ€è·¯ç”±å·²é…ç½®ã€‚"
+                                $staticRouteSelected = Read-Host "æ˜¯å¦ç»§ç»­æ·»åŠ (Y/N,default=N)?"
                                 }
                             break
                         }               
                         default {
-                            Write-Host "ÊäÈëµÄÖµÎŞĞ§"
+                            Write-Host "è¾“å…¥çš„å€¼æ— æ•ˆ"
                         }
                     }
                     break
@@ -243,36 +243,36 @@ do {
             }
 
 
-            # »ñÈ¡ÒªÉèÖÃµÄĞÂ DNS µØÖ·
-            $newDNS = Read-Host "ÇëÊäÈë¶à¸ö DNS µØÖ·£¬ÒÔ¿Õ¸ñ·Ö¸ô (¿ÉÑ¡)"
+            # è·å–è¦è®¾ç½®çš„æ–° DNS åœ°å€
+            $newDNS = Read-Host "è¯·è¾“å…¥å¤šä¸ª DNS åœ°å€ï¼Œä»¥ç©ºæ ¼åˆ†éš” (å¯é€‰)"
 
-            # ½«ÊäÈëµÄ DNS µØÖ·×Ö·û´®·Ö¸îÎªÊı×é
+            # å°†è¾“å…¥çš„ DNS åœ°å€å­—ç¬¦ä¸²åˆ†å‰²ä¸ºæ•°ç»„
             $newDNS = $newDNS.Split(" ")
 
-            # Èç¹ûÓĞÊäÈë DNS µØÖ·£¬ÔòÉèÖÃ DNS
+            # å¦‚æœæœ‰è¾“å…¥ DNS åœ°å€ï¼Œåˆ™è®¾ç½® DNS
             if ($newDNS -ne "") {
                 Set-DnsClientServerAddress -InterfaceIndex $interfaceIndex -ServerAddresses $newDNS
             }
 
-            Write-Host "Íø¿¨ÅäÖÃÒÑ¸üĞÂ¡£"
+            Write-Host "ç½‘å¡é…ç½®å·²æ›´æ–°ã€‚"
 
-            #²é¿´¸üĞÂºóµÄÅäÖÃ
+            #æŸ¥çœ‹æ›´æ–°åçš„é…ç½®
             Start-Sleep -Seconds 4
             netsh interface ipv4 show config name=$interfaceIndex
         
             break
         }
         2 {
-            # »Ö¸´Íø¿¨ÖÁÄ¬ÈÏÉèÖÃ
+            # æ¢å¤ç½‘å¡è‡³é»˜è®¤è®¾ç½®
 
-            # Çå³ıÍø¿¨µÄËùÓĞÅäÖÃ
+            # æ¸…é™¤ç½‘å¡çš„æ‰€æœ‰é…ç½®
             Get-NetIPAddress -InterfaceIndex $interfaceIndex | Remove-NetIPAddress -Confirm:$false -ErrorAction SilentlyContinue
             Get-NetRoute -InterfaceIndex $interfaceIndex | Remove-NetRoute -Confirm:$false -ErrorAction SilentlyContinue
             Set-DnsClientServerAddress -InterfaceIndex $interfaceIndex -ResetServerAddresses -ErrorAction SilentlyContinue
 
-            Write-Host "Íø¿¨ÅäÖÃÒÑ»Ö¸´ÖÁÄ¬ÈÏÉèÖÃ¡£"
+            Write-Host "ç½‘å¡é…ç½®å·²æ¢å¤è‡³é»˜è®¤è®¾ç½®ã€‚"
 
-            #²é¿´»Ö¸´ºóµÄÅäÖÃ
+            #æŸ¥çœ‹æ¢å¤åçš„é…ç½®
             Start-Sleep -Seconds 4
             netsh interface ipv4 show config name=$interfaceIndex
 
@@ -280,31 +280,31 @@ do {
         }
         3 {
 
-            # ÅäÖÃ¾²Ì¬Â·ÓÉ
+            # é…ç½®é™æ€è·¯ç”±
 
-            # »ñÈ¡ÒªÉèÖÃµÄÄ¿±êÍøÂçºÍÍø¹Ø
+            # è·å–è¦è®¾ç½®çš„ç›®æ ‡ç½‘ç»œå’Œç½‘å…³
             $staticRouteSelected = "Y"
             while ($staticRouteSelected -eq "Y") {
-                $destinationNetwork = Read-Host "ÇëÊäÈëÄ¿±êÍøÂçµØÖ·ºÍÇ°×º³¤¶È (ÀıÈç£º192.168.1.0/24)"
-                $gateway = Read-Host "ÇëÊäÈëÍø¹ØµØÖ·"
-                # Ìí¼Ó¾²Ì¬Â·ÓÉ
+                $destinationNetwork = Read-Host "è¯·è¾“å…¥ç›®æ ‡ç½‘ç»œåœ°å€å’Œå‰ç¼€é•¿åº¦ (ä¾‹å¦‚ï¼š192.168.1.0/24)"
+                $gateway = Read-Host "è¯·è¾“å…¥ç½‘å…³åœ°å€"
+                # æ·»åŠ é™æ€è·¯ç”±
                 New-NetRoute -DestinationPrefix $destinationNetwork -InterfaceIndex $interfaceIndex -NextHop $gateway
 
-                Write-Host "¾²Ì¬Â·ÓÉÒÑÅäÖÃ¡£"
-                $staticRouteSelected = Read-Host "ÊÇ·ñ¼ÌĞøÌí¼Ó(Y/N,default=N)?"
+                Write-Host "é™æ€è·¯ç”±å·²é…ç½®ã€‚"
+                $staticRouteSelected = Read-Host "æ˜¯å¦ç»§ç»­æ·»åŠ (Y/N,default=N)?"
                 }
             
-            # Êä³öÂ·ÓÉ±í
+            # è¾“å‡ºè·¯ç”±è¡¨
             Get-NetRoute -InterfaceIndex $interfaceIndex
 
             break
         }
         q {
-            #ÍË³ö½Å±¾
+            #é€€å‡ºè„šæœ¬
             exit
         }
         default {
-            Write-Host "ÎŞĞ§µÄÑ¡Ôñ£¬ÇëÖØÊäÈë¡£"
+            Write-Host "æ— æ•ˆçš„é€‰æ‹©ï¼Œè¯·é‡è¾“å…¥ã€‚"
         }
     }
 } while ($true)
